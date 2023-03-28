@@ -11,13 +11,13 @@ namespace Sidji.TestProject.Controller.Player
     public class PlayerController : MonoBehaviour
     {
         [Header("Character")]
+        [SerializeField] Transform canvasWorldSpace;
         [SerializeField] GameObject characterObject;
         [SerializeField] Animator playerAnimator;
 
         [Header("Movement")]
         [SerializeField] VirtualJoystick joystick;
         [SerializeField] float movementSpeed;
-        
 
         [Header("Attack")]
         [SerializeField] Button buttonAttack;
@@ -130,6 +130,9 @@ namespace Sidji.TestProject.Controller.Player
                 mountingObject.transform.position = Vector3.Lerp(mountingObject.transform.position, mountingObject.transform.position + movementPosition, Time.deltaTime * movementSpeed);
                 mountingObject.transform.forward = Vector3.Slerp(mountingObject.transform.forward, movementPosition, Time.deltaTime * movementSpeed);
             }
+
+            canvasWorldSpace.position = characterObject.transform.position;
+            canvasWorldSpace.eulerAngles = cameraMain.eulerAngles;
         }
     }
 }

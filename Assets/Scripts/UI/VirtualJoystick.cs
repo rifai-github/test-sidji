@@ -16,8 +16,6 @@ namespace Sidji.TestProject.Controller
         [Header("Joystick Settings")]
         [SerializeField] float joystickRange = 50f;
 
-        Vector2 joystickInput;
-
         private void Start()
         {
             SetJoystickInput(Vector2.zero);
@@ -49,7 +47,6 @@ namespace Sidji.TestProject.Controller
         private void SetJoystickInput(Vector2 input)
         {
             OnJoystickInput?.Invoke(input);
-            joystickInput = input;
         }
     }
 }

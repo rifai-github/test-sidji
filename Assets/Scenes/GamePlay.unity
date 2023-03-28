@@ -123,6 +123,23 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &29770741 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8397136033916052559, guid: 5f4d9eb9d41d6f4408aff3bb0bac44d4, type: 3}
+  m_PrefabInstance: {fileID: 356212690}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &29770744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 29770741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: daf021fb7462ed14cb5aa8f9621afb59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &246861130
 GameObject:
   m_ObjectHideFlags: 3
@@ -211,6 +228,18 @@ PrefabInstance:
     - target: {fileID: 419116079311669812, guid: 5f4d9eb9d41d6f4408aff3bb0bac44d4, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.09
+      objectReference: {fileID: 0}
+    - target: {fileID: 3194007593667281784, guid: 5f4d9eb9d41d6f4408aff3bb0bac44d4, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3194007593667281784, guid: 5f4d9eb9d41d6f4408aff3bb0bac44d4, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3359633845159711255, guid: 5f4d9eb9d41d6f4408aff3bb0bac44d4, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3701829943431823449, guid: 5f4d9eb9d41d6f4408aff3bb0bac44d4, type: 3}
       propertyPath: m_RootOrder
@@ -1446,7 +1475,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7292658344771522932, guid: f5b41ba4c79702547a89de7544b80656, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.94
+      value: 23.3
       objectReference: {fileID: 0}
     - target: {fileID: 7292658344771522932, guid: f5b41ba4c79702547a89de7544b80656, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1454,7 +1483,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7292658344771522932, guid: f5b41ba4c79702547a89de7544b80656, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -8.4
       objectReference: {fileID: 0}
     - target: {fileID: 7292658344771522932, guid: f5b41ba4c79702547a89de7544b80656, type: 3}
       propertyPath: m_LocalRotation.w
