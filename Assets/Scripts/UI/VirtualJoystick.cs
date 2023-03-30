@@ -4,17 +4,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Sidji.TestProject.Controller
+namespace Sidji.TestProject.Controller.Joystick
 {
     public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
     {
+        public static VirtualJoystick GetVirtualJoystick(JoystickType type)
+        {
+            foreach(var joystick in FindObjectsOfType<VirtualJoystick>())
+            {
+                if (joystick.GetJoystickType == type)
+                    return joystick;
+            }
+            return null;
+        }
+
         public event Action<Vector2> OnJoystickInput;
 
         [SerializeField] RectTransform joystickContainer;
         [SerializeField] RectTransform joystickHandle;
 
         [Header("Joystick Settings")]
+        [SerializeField] JoystickType joystickType;
         [SerializeField] float joystickRange = 50f;
+
+        public JoystickType GetJoystickType => joystickType;
+        
+        private void Awake()
+        {
+        }
 
         private void Start()
         {
@@ -48,5 +65,11 @@ namespace Sidji.TestProject.Controller
         {
             OnJoystickInput?.Invoke(input);
         }
+    }
+
+    public enum JoystickType
+    {
+        LeftJoystick,
+        RightJoystick,
     }
 }

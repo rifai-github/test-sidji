@@ -7,17 +7,17 @@ namespace Sidji.TestProject.Controller
 {
     public class ColliderTrigger : MonoBehaviour
     {
-        public event Action<Collision> OnColosionEnterToObject;
-        public event Action<Collision> OnColosionExitFromObject;
+        public event Action<GameObject> OnTriggerEnterToObject;
+        public event Action<GameObject> OnTriggerExitFromObject;
 
-        private void OnCollisionEnter(Collision other)
+        private void OnTriggerEnter(Collider other)
         {    
-            OnColosionEnterToObject?.Invoke(other);
+            OnTriggerEnterToObject?.Invoke(other.gameObject);
         }
 
-        private void OnCollisionExit(Collision other)
+        private void OnTriggerExit(Collider other)
         {
-            OnColosionExitFromObject?.Invoke(other);
+            OnTriggerExitFromObject?.Invoke(other.gameObject);
         }
     }
 }

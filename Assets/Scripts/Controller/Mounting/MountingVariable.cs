@@ -1,17 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Fusion;
 
 namespace Sidji.TestProject.Controller.Mounting
 {
-    public class MountingVariable : MonoBehaviour
+    public class MountingVariable : NetworkBehaviour
     {
         [SerializeField] MountingType type;
-        [SerializeField] Animator mountingAnimator;
-        [SerializeField] GameObject mountingObject;
-
-        public Animator MountingAnimator => mountingAnimator;
-        public GameObject MountingObject => mountingObject;
     }
 
     public enum MountingType
