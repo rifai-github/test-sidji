@@ -14,17 +14,26 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
     NetworkRunner networkRunner;
     [SerializeField] NetworkPlayerController playerPrefab;
 
-    Camera mainCamera;
+
 
     void Awake()
     {
         networkRunner = GetComponent<NetworkRunner>();
-        mainCamera = Camera.main;
     }
 
     void Start()
     {
-        InitializeNetworkRunner(networkRunner, GameMode.AutoHostOrClient, NetAddress.Any(), SceneManager.GetActiveScene().buildIndex, null);
+        InitializeNetworkRunner(
+            runner: networkRunner,
+        #if UNITY_SERVER && !UNITY_EDITOR
+            mode: GameMode.Server,
+        #else
+            mode: GameMode.Client,
+        #endif
+            address: NetAddress.Any(),
+            scene: SceneManager.GetActiveScene().buildIndex,
+            initialized: null
+        );
     }
 
     protected virtual Task InitializeNetworkRunner(NetworkRunner runner, GameMode mode, NetAddress address, SceneRef scene, Action<NetworkRunner> initialized)
@@ -38,7 +47,7 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
             GameMode = mode,
             Address = address,
             Scene = scene,
-            SessionName = "SessionName",
+            SessionName = "DEFAULT",
             Initialized = initialized,
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
         });
