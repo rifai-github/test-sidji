@@ -26,8 +26,11 @@ namespace Sidji.TestProject.Controller.Player
 
         Vector2 inputMovement;
 
-        public bool inAttack => playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack02_SwordAndShiled");
-        public bool isDie => playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Die01_Stay_SwordAndShield");
+        bool initialize = false;
+
+
+        bool inAttack;
+        bool isDie => playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Die01_Stay_SwordAndShield");
         
 
         int maxHealth = 10;
@@ -35,7 +38,7 @@ namespace Sidji.TestProject.Controller.Player
         Transform cameraMain;
         CinemachineFreeLook freeLook;
         
-        [Networked(OnChanged = "RefreshHealth")] int currentHealth { get; set; }
+        [Networked] int currentHealth { get; set; }
         [Networked] NetworkObject mountingObject { get; set; }
         
         [Networked] Vector3 MovementPosition { get; set; }
@@ -44,8 +47,26 @@ namespace Sidji.TestProject.Controller.Player
 
         public static NetworkPlayerController Local;
 
+
+        private void Init()
+        {
+            if (initialize) return;
+
+            health.maxValue = maxHealth;
+            health.value = maxHealth;
+            if (currentHealth > 0)
+                health.value = currentHealth;
+            else
+                currentHealth = maxHealth;
+
+            var colliderPlayerTrigger = GetComponent<ColliderTrigger>();
+            colliderPlayerTrigger.OnTriggerEnterToObject += OnTriggerObjectEnter;
+            colliderPlayerTrigger.OnTriggerExitFromObject += OnTriggerObjectExit;
+        }
+
         public override void Spawned()
         {
+            Init();
             if (Object.HasInputAuthority)
             {
                 Local = this;
@@ -57,12 +78,6 @@ namespace Sidji.TestProject.Controller.Player
             {
                 Debug.Log("Client Player Spawned");
             }
-
-            health.maxValue = maxHealth;
-            currentHealth = 10;
-            var colliderPlayerTrigger = GetComponent<ColliderTrigger>();
-            colliderPlayerTrigger.OnTriggerEnterToObject += OnTriggerObjectEnter;
-            colliderPlayerTrigger.OnTriggerExitFromObject += OnTriggerObjectExit;
         }
 
         private void OnTriggerObjectEnter(GameObject other)
@@ -81,7 +96,7 @@ namespace Sidji.TestProject.Controller.Player
             {
                 if (weaponVar.inAttack)
                 {
-                    currentHealth--;
+                    RpcSetHealth(currentHealth - 1);
                 }
             }
         }
@@ -105,17 +120,28 @@ namespace Sidji.TestProject.Controller.Player
         }
 
 
-        [Rpc(RpcSources.All, RpcTargets.All)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         public void RpcExecuteAttack()
         {
             if (mountingObject == null)
-            {
-                playerAnimator.SetTrigger("attack");
+            {   
+                if (!isDie)
+                    playerAnimator.SetTrigger("attack");
             }
             else
             {
                 RpcMountObject(null);
             }
+        }
+        
+        [Rpc(RpcSources.All, RpcTargets.All)]
+        public void RpcSetHealth(int hp)
+        {
+            currentHealth = hp;
+            health.value = currentHealth;
+
+            if (hp == 0)
+                playerAnimator.SetTrigger("die");
         }
         
         [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
@@ -124,13 +150,29 @@ namespace Sidji.TestProject.Controller.Player
             MovementPosition = movementPosition;
         }
         
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         public void RpcRefreshInAttack()
         {
-            weapon.inAttack = inAttack;
+            if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack02_SwordAndShiled"))
+            {
+                if (!inAttack)
+                {
+                    inAttack = true;
+                    weapon.inAttack = true;
+                }
+                else
+                {
+                    weapon.inAttack = false;
+                }
+            }
+            else
+            {
+                inAttack = false;
+                weapon.inAttack = false;
+            }
         }
         
-        [Rpc(RpcSources.All, RpcTargets.All)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         public void RpcMountObject(NetworkObject mounting)
         {
             if (mounting == null)
@@ -168,24 +210,12 @@ namespace Sidji.TestProject.Controller.Player
             }
         }
 
-        public static void RefreshHealth(Changed<NetworkPlayerController> changed)
-        {
-            var player = changed.Behaviour;
-
-
-            player.health.value = player.currentHealth;
-            if (player.currentHealth == 0)
-            {
-                player.playerAnimator.SetTrigger("die");
-            }
-        }
-
         public override void FixedUpdateNetwork()
         {
-            transform.position = Vector3.Lerp(transform.position, transform.position + MovementPosition, Time.deltaTime * movementSpeed * (mountingObject == null ? 1 : 1.5f));
-            transform.forward = Vector3.Slerp(transform.forward, MovementPosition, Time.deltaTime * movementSpeed * (mountingObject == null ? 1 : 1.5f));
+            transform.position = Vector3.Lerp(transform.position, transform.position + MovementPosition, Time.fixedDeltaTime * movementSpeed * (mountingObject == null ? 1 : 1.5f));
+            transform.forward = Vector3.Slerp(transform.forward, MovementPosition, Time.fixedDeltaTime * movementSpeed * (mountingObject == null ? 1 : 1.5f));
                 
-            smoothTransition = Mathf.Lerp(smoothTransition, MovementPosition.magnitude, Time.deltaTime * movementSpeed * (mountingObject == null ? 1 : 1.5f));
+            smoothTransition = Mathf.Lerp(smoothTransition, MovementPosition.magnitude, Time.fixedDeltaTime * movementSpeed * (mountingObject == null ? 1 : 1.5f));
             if (mountingObject == null) playerAnimator.SetFloat("movement", smoothTransition);
             else mountingObject.GetComponent<Animator>().SetFloat("movement", smoothTransition);
         }
