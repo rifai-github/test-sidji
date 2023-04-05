@@ -99,12 +99,9 @@ namespace Sidji.TestProject.Controller.Player
                 {
                     if (mountVar.PassangerInfo != null)
                     {
-                        
-                        Debug.Log("mountVar.PassangerInfo :: " + mountVar.PassangerInfo.gameObject);
                         return;
                     }
 
-                    Debug.Log("unmounting : " + unmounting);
                     if (unmounting)
                         return;
 
@@ -200,7 +197,6 @@ namespace Sidji.TestProject.Controller.Player
                 {
                     if (mountingObject.TryGetComponent<MountingVariable>(out var mountingVariable))
                     {
-                        Debug.Log("PassangerInfo Before - " + mountingVariable.PassangerInfo.gameObject.name);
                         mountingVariable.PassangerInfo = null;
                     }
                 }
@@ -225,7 +221,6 @@ namespace Sidji.TestProject.Controller.Player
             {
                 if (unmounting)
                 {
-                    Debug.Log("JALAN : " + unmountPosition);
                     transform.position = Vector3.MoveTowards(transform.position, unmountPosition, Time.fixedDeltaTime * movementSpeed);
                     if(Vector3.Distance(transform.position, unmountPosition) < 0.1f)
                     {

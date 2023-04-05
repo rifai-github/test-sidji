@@ -82,10 +82,6 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        if (NetworkPlayerController.Local != null)
-        {
-            // input.Set(NetworkPlayerController.Local.GetPlayerMovement());
-        }
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
@@ -104,7 +100,6 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        // runner.Despawn(runner)
     }
 
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data)
