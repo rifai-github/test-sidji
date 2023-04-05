@@ -13,6 +13,7 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 {
     NetworkRunner networkRunner;
     [SerializeField] NetworkPlayerController playerPrefab;
+    [SerializeField] GameMode mode;
 
 
 
@@ -28,7 +29,7 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
         #if UNITY_SERVER && !UNITY_EDITOR
             mode: GameMode.Server,
         #else
-            mode: GameMode.Client,
+            mode: mode,
         #endif
             address: NetAddress.Any(),
             scene: SceneManager.GetActiveScene().buildIndex,
