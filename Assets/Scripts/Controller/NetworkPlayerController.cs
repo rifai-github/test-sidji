@@ -37,6 +37,9 @@ namespace Sidji.TestProject.Controller.Player
 
         Transform cameraMain;
         CinemachineFreeLook freeLook;
+
+        [Networked] Vector3 unmountPosition { get; set; }
+        [Networked] NetworkBool unmounting { get; set; }
         
         [Networked] int currentHealth { get; set; }
         [Networked] NetworkObject mountingObject { get; set; }
@@ -82,16 +85,6 @@ namespace Sidji.TestProject.Controller.Player
 
         private void OnTriggerObjectEnter(GameObject other)
         {
-            if (other.TryGetComponent<MountingVariable>(out var mountVar))
-            {
-                if (other.transform.parent != null) return;
-                if (other.TryGetComponent<NetworkObject>(out var networkObj))
-                    RpcMountObject(networkObj);
-            }
-        }
-
-        private void OnTriggerObjectExit(GameObject other)
-        {
             if (other.TryGetComponent<WeaponVariable>(out var weaponVar))
             {
                 if (weaponVar.inAttack)
@@ -99,6 +92,29 @@ namespace Sidji.TestProject.Controller.Player
                     RpcSetHealth(currentHealth - 1);
                 }
             }
+            
+            if (other.TryGetComponent<MountingVariable>(out var mountVar))
+            {
+                if (other.TryGetComponent<NetworkObject>(out var networkObj))
+                {
+                    if (mountVar.PassangerInfo != null)
+                    {
+                        
+                        Debug.Log("mountVar.PassangerInfo :: " + mountVar.PassangerInfo.gameObject);
+                        return;
+                    }
+
+                    Debug.Log("unmounting : " + unmounting);
+                    if (unmounting)
+                        return;
+
+                    RpcMountObject(networkObj);
+                }
+            }
+        }
+
+        private void OnTriggerObjectExit(GameObject other)
+        {
         }
 
         public void PlayerLeft(PlayerRef player)
@@ -120,7 +136,7 @@ namespace Sidji.TestProject.Controller.Player
         }
 
 
-        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         public void RpcExecuteAttack()
         {
             if (mountingObject == null)
@@ -172,52 +188,64 @@ namespace Sidji.TestProject.Controller.Player
             }
         }
         
-        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         public void RpcMountObject(NetworkObject mounting)
         {
             if (mounting == null)
             {
-                if (mountingObject == null) return;
-
-                Instantiate(mountingObject);
-                Destroy(mountingObject);
-
-                transform.position = transform.position + (transform.right * 2);
-                GetComponent<Rigidbody>().useGravity = true;
+                unmounting = true;
+                unmountPosition = transform.position + (transform.right * 2);
                 
-                if (Object.HasInputAuthority)
+                if (mountingObject != null)
                 {
-                    freeLook.LookAt = characterObject;
+                    if (mountingObject.TryGetComponent<MountingVariable>(out var mountingVariable))
+                    {
+                        Debug.Log("PassangerInfo Before - " + mountingVariable.PassangerInfo.gameObject.name);
+                        mountingVariable.PassangerInfo = null;
+                    }
                 }
             }
-            else if (mountingObject == null)
+            else
             {
-                mountingObject = mounting;
-
-                playerAnimator.SetFloat("movement", 0);
-                transform.rotation = mountingObject.transform.rotation;
-
-                transform.localPosition = new Vector3(mountingObject.transform.localPosition.x, mountingObject.transform.localPosition.y + 1.5f, mountingObject.transform.localPosition.z);
-                GetComponent<Rigidbody>().useGravity = false;
-                transform.localRotation = mountingObject.transform.localRotation;
-
-                mountingObject.transform.SetParent(transform);
-                
-                if (Object.HasInputAuthority)
+                unmounting = false;
+                if (mounting.TryGetComponent<MountingVariable>(out var mountingVariable))
                 {
-                    freeLook.LookAt = mountingObject.transform;
+                    mountingVariable.PassangerInfo = this;
                 }
+                mountingObject = mounting;
             }
+            
+
+            playerAnimator.SetFloat("movement", 0);
         }
 
         public override void FixedUpdateNetwork()
         {
-            transform.position = Vector3.Lerp(transform.position, transform.position + MovementPosition, Time.fixedDeltaTime * movementSpeed * (mountingObject == null ? 1 : 1.5f));
-            transform.forward = Vector3.Slerp(transform.forward, MovementPosition, Time.fixedDeltaTime * movementSpeed * (mountingObject == null ? 1 : 1.5f));
-                
-            smoothTransition = Mathf.Lerp(smoothTransition, MovementPosition.magnitude, Time.fixedDeltaTime * movementSpeed * (mountingObject == null ? 1 : 1.5f));
-            if (mountingObject == null) playerAnimator.SetFloat("movement", smoothTransition);
-            else mountingObject.GetComponent<Animator>().SetFloat("movement", smoothTransition);
+            if (mountingObject != null)
+            {
+                if (unmounting)
+                {
+                    Debug.Log("JALAN : " + unmountPosition);
+                    transform.position = Vector3.MoveTowards(transform.position, unmountPosition, Time.fixedDeltaTime * movementSpeed);
+                    if(Vector3.Distance(transform.position, unmountPosition) < 0.1f)
+                    {
+                        mountingObject = null;
+                        unmounting = false;
+                    }
+                    return;
+                }
+            }
+            else
+            {
+                smoothTransition = Mathf.Lerp(smoothTransition, MovementPosition.magnitude, Time.fixedDeltaTime * movementSpeed * (mountingObject == null ? 1 : 2f));
+                if (mountingObject == null)
+                {
+                    playerAnimator.SetFloat("movement", smoothTransition);
+                }
+            }
+
+            transform.position = Vector3.Lerp(transform.position, transform.position + MovementPosition, Time.fixedDeltaTime * movementSpeed * (mountingObject == null ? 1 : 2f));
+            transform.forward = Vector3.Slerp(transform.forward, MovementPosition, Time.fixedDeltaTime * movementSpeed * (mountingObject == null ? 1 : 2f));
         }
 
         public void InputReceived(Vector2 input)
