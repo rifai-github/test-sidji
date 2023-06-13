@@ -6,52 +6,67 @@ using Fusion;
 using Fusion.Sockets;
 using Sidji.TestProject.Controller.Player;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using Agones;
 
 [RequireComponent(typeof (NetworkRunner))]
 public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 {
+    public static MainNetworkRunner Instance;
+    
     NetworkRunner networkRunner;
     [SerializeField] NetworkPlayerController playerPrefab;
-    [SerializeField] GameMode mode;
+    [SerializeField] SessionSelection sessionSelection;
+    
 
+    List<PlayerRef> playerList = new List<PlayerRef>();
+
+    bool isJoined = false;
 
 
     void Awake()
     {
+        DontDestroyOnLoad(gameObject);
         networkRunner = GetComponent<NetworkRunner>();
+        Instance = this;
     }
 
-    void Start()
+    async void Start()
     {
-        InitializeNetworkRunner(
-            runner: networkRunner,
-        #if UNITY_SERVER && !UNITY_EDITOR
-            mode: GameMode.Server,
-        #else
-            mode: mode,
+        #if !UNITY_SERVER || UNITY_EDITOR
+        var result = await networkRunner.JoinSessionLobby(SessionLobby.ClientServer);
+
+        if (result.Ok) {
+            Debug.Log("Join Session ClientServer Success");
+        } else {
+            Debug.LogError($"Failed to Start: {result.ShutdownReason}");
+        }
         #endif
-            address: NetAddress.Any(),
-            scene: SceneManager.GetActiveScene().buildIndex,
-            initialized: null
-        );
     }
+    
 
-    protected virtual Task InitializeNetworkRunner(NetworkRunner runner, GameMode mode, NetAddress address, SceneRef scene, Action<NetworkRunner> initialized)
+    public async void StartSessionFusion(string sessionName)
     {
-        runner.ProvideInput = true;
+        networkRunner.ProvideInput = true;
 
-        Debug.Log("Session Initializing");
+        Debug.Log("Session Initializing : " + sessionName);
 
-        return runner.StartGame(new StartGameArgs()
+        var result = await networkRunner.StartGame(new StartGameArgs()
         {
-            GameMode = mode,
-            Address = address,
-            Scene = scene,
-            SessionName = "DEFAULT",
-            Initialized = initialized,
+        #if !UNITY_SERVER || UNITY_EDITOR
+            GameMode = GameMode.Client,
+        #else
+            GameMode = GameMode.Server,
+        #endif
+            SessionName = sessionName,
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
         });
+
+        if (result.Ok) {
+            isJoined = true;
+            Debug.Log("Session Initialized : " + sessionName);
+        } else {
+            Debug.LogError($"Failed to Start: {result.ShutdownReason}");
+        }
     }
 
     public void OnConnectedToServer(NetworkRunner runner)
@@ -90,6 +105,15 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
+        #if UNITY_SERVER && !UNITY_EDITOR
+        if (playerList.Count == 0)
+        {
+            Debug.Log("Run Fuction Allocate");
+            AgonesServerBehaviour.Instance.AgonesSdk.Allocate();
+        }
+        #endif
+
+        playerList.Add(player);
         if (runner.IsServer)
         {
             Vector2 spawnLocation = Vector2.zero;
@@ -100,6 +124,15 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
+        playerList.Remove(player);
+        playerList.TrimExcess();
+        #if UNITY_SERVER && !UNITY_EDITOR
+        if (playerList.Count == 0)
+        {
+            Debug.Log("Run Function Shutdown");
+            AgonesServerBehaviour.Instance.AgonesSdk.Shutdown();
+        }
+        #endif
     }
 
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data)
@@ -116,6 +149,10 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
+        #if !UNITY_SERVER || UNITY_EDITOR
+        if (!isJoined)
+            sessionSelection.RefreshSession(sessionList);
+        #endif
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
