@@ -26,6 +26,9 @@ jobs:
       - name: Initialize Git repository
         run: git init
 
+      - name: Change Ownership of Repository
+        run: sudo chown -R $USER $GITHUB_WORKSPACE
+
       - name: Build Unity Dedicated Server
         run: |
           mkdir -p Build
