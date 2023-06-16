@@ -6,6 +6,7 @@ on:
 env:
   PROJECT_ID: agones-test-385708
   IMAGE_NAME: server_test_rifai
+  OUTPUT_PATH: Builds/Server/
 
 jobs:
   buildLinuxGameServer:
@@ -25,7 +26,7 @@ jobs:
 
       - name: Build Unity Dedicated Server
         run: |
-          mkdir -p Build
+          mkdir -p ${{ env.OUTPUT_PATH }}
           /opt/unity/Editor/Unity \
             -quit \
             -batchmode \
@@ -35,6 +36,7 @@ jobs:
             -serial "${{ secrets.UNITY_SERIAL }}" \
             -username "${{ secrets.UNITY_EMAIL }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
+            -outputPath "${{ env.OUTPUT_PATH }}/UnityServer.x86_64" \
             -silent-crashes
 
       - name: Get Commit ID
@@ -49,14 +51,30 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-      - name: Configure GCR Container Registry
-        uses: google-github-actions/auth@v1
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v1'
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+        
+      - name: Push to GCR GitHub Action
+        uses: RafikFarhad/push-to-gcr-github-action@v4.1
+        with:
+          registry: gcr.io
           project_id: ${{ env.PROJECT_ID }}
+          image_name: ${{ env.IMAGE_NAME }}
+          image_tag: ${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }}
+      
+      # - name: Decode GCP_SA_KEY
+      #   run: |
+      #     echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > gcp-sa-key.json
+        
+      # - name: Configure Docker CLI
+      #   run: |
+      #     gcloud auth activate-service-account --key-file=gcp-sa-key.json
+      #     gcloud auth configure-docker
 
-      - name: Build and Push Docker Image
-        env:
-          IMAGE_TAG: gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }}
-        run: |
-          docker buildx build --push --tag $IMAGE_TAG .
+      # - name: Build and Push Docker Image
+      #   run: |
+      #     docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }} .
+      #     docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }}
