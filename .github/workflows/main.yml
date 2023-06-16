@@ -56,16 +56,22 @@ jobs:
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
-        
-      - name: Push to GCR GitHub Action
-        uses: RafikFarhad/push-to-gcr-github-action@v4.1
+      
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.3.0
         with:
-          registry: gcr.io
           project_id: ${{ env.PROJECT_ID }}
-          image_name: ${{ env.IMAGE_NAME }}
-          image_tag: ${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
-          dockerfile: ./Dockerfile
-          context: ./
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+        
+      # - name: Push to GCR GitHub Action
+      #   uses: RafikFarhad/push-to-gcr-github-action@v4.1
+      #   with:
+      #     registry: gcr.io
+      #     project_id: ${{ env.PROJECT_ID }}
+      #     image_name: ${{ env.IMAGE_NAME }}
+      #     image_tag: ${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
+      #     dockerfile: ./Dockerfile
+      #     context: ./
       
       # - name: Decode GCP_SA_KEY
       #   run: |
@@ -76,7 +82,9 @@ jobs:
       #     gcloud auth activate-service-account --key-file=gcp-sa-key.json
       #     gcloud auth configure-docker
 
-      # - name: Build and Push Docker Image
-      #   run: |
-      #     docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }} .
-      #     docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }}
+      - name: Build and Push Docker Image
+        run: |
+          gcloud builds submit --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }}
+
+          
+          
