@@ -64,6 +64,7 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           image_name: ${{ env.IMAGE_NAME }}
           image_tag: ${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }}
+          dockerfile: Dockerfile
       
       # - name: Decode GCP_SA_KEY
       #   run: |
