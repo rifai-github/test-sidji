@@ -77,14 +77,11 @@ jobs:
       #   run: |
       #     echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > gcp-sa-key.json
         
-      # - name: Configure Docker CLI
-      #   run: |
-      #     gcloud auth activate-service-account --key-file=gcp-sa-key.json
-      #     gcloud auth configure-docker
+      - name: Configure Docker CLI
+        run: |
+          gcloud auth configure-docker
 
       - name: Build and Push Docker Image
         run: |
-          gcloud builds submit --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }}
-
-          
-          
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }} .
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }}
