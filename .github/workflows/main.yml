@@ -55,9 +55,12 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ env.PROJECT_ID }}
       
-      - name: Configure Docker CLI
+      - name: Decode GCP_SA_KEY
         run: |
           echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > gcp-sa-key.json
+      
+      - name: Configure Docker CLI
+        run: |
           gcloud auth activate-service-account --key-file=gcp-sa-key.json
           gcloud auth configure-docker
 
