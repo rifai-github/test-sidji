@@ -57,11 +57,10 @@ jobs:
       
       - name: Decode GCP_SA_KEY
         run: |
-          export GCP_SA_KEY=$(echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode)
+          echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > gcp-sa-key.json
         
       - name: Configure Docker CLI
         run: |
-          echo "$GCP_SA_KEY" > gcp-sa-key.json
           gcloud auth activate-service-account --key-file=gcp-sa-key.json
           gcloud auth configure-docker
 
