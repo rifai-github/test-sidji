@@ -22,11 +22,6 @@ jobs:
         run: |
           apt-get update
           apt-get install -y git
-      
-      - name: Print Commit ID and Branch Name
-        run: |
-          echo "Commit ID: $GITHUB_SHA"
-          echo "Branch Name: ${GITHUB_REF#refs/heads/}"
 
       - name: Build Unity Dedicated Server
         run: |
@@ -42,13 +37,19 @@ jobs:
             -password "${{ secrets.UNITY_PASSWORD }}" \
             -silent-crashes
 
+      - name: Print Commit ID and Branch Name
+        run: |
+          echo "Commit ID: $GITHUB_SHA"
+          echo "Branch Name: ${GITHUB_REF#refs/heads/}"
+
       - name: Retrieve Git Commit ID
+        id: git
         run: |
           commit_id=$(git rev-parse HEAD | cut -c 1-8)
           branch_name=$(git rev-parse --abbrev-ref HEAD)
           echo "Commit ID: $commit_id"
-          echo "COMMIT_ID=$commit_id" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
+          echo "branchname=$branch_name" >> $GITHUB_OUTPUT
+          echo "commitid=$commit_id" >> $GITHUB_OUTPUT
 
       - name: Get current date
         id: date
@@ -62,7 +63,7 @@ jobs:
           password: ${{ secrets.GOOGLE_GCR_KEY }}
 
       - name: Build Docker image
-        run: docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.BRANCH_NAME }}-${{ env.COMMIT_ID }}-${{ steps.date.outputs.date }} .
+        run: docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.git.outputs.branchname }}-${{ steps.git.outputs.commitid }}-${{ steps.date.outputs.date }} .
 
       - name: Push Docker image
-        run: docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.BRANCH_NAME }}-${{ env.COMMIT_ID }}-${{ steps.date.outputs.date }}
+        run: docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.git.outputs.branchname }}-${{ steps.git.outputs.commitid }}-${{ steps.date.outputs.date }}
