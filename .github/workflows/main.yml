@@ -23,13 +23,8 @@ jobs:
           apt-get update
           apt-get install -y git
 
-      - name: Retrieve Git Commit ID
-        run: |
-          commit_id=$(git rev-parse HEAD | cut -c 1-8)
-          branch_name=$(git rev-parse --abbrev-ref HEAD)
-          echo "Commit ID: $commit_id"
-          echo "COMMIT_ID=$commit_id" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
+      - name: Initialize Git repository
+        run: git init
 
       - name: Build Unity Dedicated Server
         run: |
@@ -44,6 +39,14 @@ jobs:
             -username "${{ secrets.UNITY_EMAIL }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
             -silent-crashes
+
+      - name: Retrieve Git Commit ID
+        run: |
+          commit_id=$(git rev-parse HEAD | cut -c 1-8)
+          branch_name=$(git rev-parse --abbrev-ref HEAD)
+          echo "Commit ID: $commit_id"
+          echo "COMMIT_ID=$commit_id" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
 
       - name: Get current date
         id: date
