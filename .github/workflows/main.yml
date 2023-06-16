@@ -37,19 +37,13 @@ jobs:
             -password "${{ secrets.UNITY_PASSWORD }}" \
             -silent-crashes
 
-      - name: Print Commit ID and Branch Name
-        run: |
-          echo "Commit ID: $GITHUB_SHA"
-          echo "Branch Name: ${GITHUB_REF#refs/heads/}"
-
-      - name: Retrieve Git Commit ID
-        id: git
-        run: |
-          commit_id=$(git rev-parse HEAD | cut -c 1-8)
-          branch_name=$(git rev-parse --abbrev-ref HEAD)
-          echo "Commit ID: $commit_id"
-          echo "branchname=$branch_name" >> $GITHUB_OUTPUT
-          echo "commitid=$commit_id" >> $GITHUB_OUTPUT
+      - name: Get Commit ID
+        id: commit_id
+        run: echo "::set-output name=commit_id::${GITHUB_SHA}"
+      
+      - name: Get Branch Name
+        id: branch_name
+        run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
 
       - name: Get current date
         id: date
@@ -63,7 +57,7 @@ jobs:
           password: ${{ secrets.GOOGLE_GCR_KEY }}
 
       - name: Build Docker image
-        run: docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.git.outputs.branchname }}-${{ steps.git.outputs.commitid }}-${{ steps.date.outputs.date }} .
+        run: docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }} .
 
       - name: Push Docker image
-        run: docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.git.outputs.branchname }}-${{ steps.git.outputs.commitid }}-${{ steps.date.outputs.date }}
+        run: docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.commit_id.outputs.commit_id }}-${{ steps.date.outputs.date }}
