@@ -19,9 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2.7.0
-
       - name: Install Git
         run: |
           apt-get update
@@ -62,13 +59,60 @@ jobs:
           
       
       - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.3.0
+        uses: google-github-actions/setup-gcloud@v1.1.1
         with:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
 
+          
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'
+          
+      - name: 'Use gcloud to upload docker'
+        run: 'gcloud builds submit --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}'
+
       
 
+          
+      - name: Build Docker Image
+        run: |
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:2-${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }} .\
+
+      - name: Push Docker Image
+        run: |
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:2-${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
+
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2.7.0
+
+      - name: Login to GCR
+        uses: docker/login-action@v2
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCP_SA_KEY }}
+
+          
+      - name: Build Docker Image
+        run: |
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:3-${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }} .\
+
+      - name: Push Docker Image
+        run: |
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:3-${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
+
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: your-image-tag
+
+          
       - name: Build Docker Image
         run: |
           docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }} .\
@@ -99,10 +143,3 @@ jobs:
       # - name: Configure Docker CLI
       #   run: |
       #     gcloud auth configure-docker
-
-      # - name: Login to GCR
-      #   uses: docker/login-action@v2
-      #   with:
-      #     registry: gcr.io
-      #     username: _json_key
-      #     password: ${{ secrets.GCP_SA_KEY }}
