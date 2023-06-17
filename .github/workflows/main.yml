@@ -39,15 +39,25 @@ jobs:
             -serial "${{ secrets.UNITY_SERIAL }}" \
             -username "${{ secrets.UNITY_EMAIL }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
-            -outputPath "/__w/test-sidji/test-sidji/${{ env.OUTPUT_PATH }}/UnityServer.x86_64" \
+            -outputPath "${{ github.workspace }}/${{ env.OUTPUT_PATH }}/UnityServer.x86_64" \
             -silent-crashes
             
       - name: Get current directory
         run: pwd
 
-      
       - name: Show directory tree 1
         run: find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+
+      - name: Show directory tree ALL
+        run: |
+          cd /
+          find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+          cd ${{ github.workspace }}
+
+
+      - name: Back to workspace
+        run: |
+          cd ${{ github.workspace }}
 
       - name: Get Commit ID
         id: commit_id
