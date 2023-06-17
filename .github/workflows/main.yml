@@ -36,24 +36,15 @@ jobs:
             -serial "${{ secrets.UNITY_SERIAL }}" \
             -username "${{ secrets.UNITY_EMAIL }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
-            -outputPath "${{ env.OUTPUT_PATH }}/UnityServer.x86_64" \
+            -outputPath "./${{ env.OUTPUT_PATH }}/UnityServer.x86_64" \
             -silent-crashes
-      
-      - name: List directories 1
-        run: ls -l
-              
-      - name: List directories 2
-        run: ls -l Builds
-      
-      - name: List directories 3
-        run: ls -l Builds/Server
+            
+      - name: Get current directory
+        run: pwd
 
       
       - name: Show directory tree 1
         run: find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
-        
-      - name: Show directory tree
-        run: tree
 
       - name: Get Commit ID
         id: commit_id
