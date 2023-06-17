@@ -67,20 +67,30 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Encode GCP_SA_KEY
-        id: encode_key
-        run: echo -n "${{ secrets.GCP_SA_KEY }}" | base64
+      
+
+      - name: Build Docker Image
+        run: |
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }} .\
+
+      - name: Push Docker Image
+        run: |
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
+
+      # - name: Encode GCP_SA_KEY
+      #   id: encode_key
+      #   run: echo -n "${{ secrets.GCP_SA_KEY }}" | base64
         
-      - name: Push to GCR GitHub Action
-        uses: RafikFarhad/push-to-gcr-github-action@v4.1
-        with:
-          gcloud_service_key: ${{ steps.encode_key.outputs.stdout }}
-          registry: gcr.io
-          project_id: ${{ env.PROJECT_ID }}
-          image_name: ${{ env.IMAGE_NAME }}
-          image_tag: ${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
-          dockerfile: ./Dockerfile
-          context: ./
+      # - name: Push to GCR GitHub Action
+      #   uses: RafikFarhad/push-to-gcr-github-action@v4.1
+      #   with:
+      #     gcloud_service_key: ${{ steps.encode_key.outputs.stdout }}
+      #     registry: gcr.io
+      #     project_id: ${{ env.PROJECT_ID }}
+      #     image_name: ${{ env.IMAGE_NAME }}
+      #     image_tag: ${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
+      #     dockerfile: ./Dockerfile
+      #     context: ./
       
       # - name: Decode GCP_SA_KEY
       #   run: |
@@ -96,8 +106,3 @@ jobs:
       #     registry: gcr.io
       #     username: _json_key
       #     password: ${{ secrets.GCP_SA_KEY }}
-
-      # - name: Build and Push Docker Image
-      #   run: |
-      #     docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }} .
-      #     docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
