@@ -23,6 +23,9 @@ jobs:
         run: |
           apt-get update
           apt-get install -y git
+          
+      - name: Get working directory
+        run: echo "${{ github.workspace }}"
 
       - name: Build Unity Dedicated Server
         run: |
@@ -36,7 +39,7 @@ jobs:
             -serial "${{ secrets.UNITY_SERIAL }}" \
             -username "${{ secrets.UNITY_EMAIL }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
-            -outputPath "./${{ env.OUTPUT_PATH }}/UnityServer.x86_64" \
+            -outputPath "/__w/test-sidji/test-sidji/${{ env.OUTPUT_PATH }}/UnityServer.x86_64" \
             -silent-crashes
             
       - name: Get current directory
