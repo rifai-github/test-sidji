@@ -40,11 +40,14 @@ jobs:
             -silent-crashes
       
       - name: List directories
-        run: ls -l
+        run: ls -l /Builds
+      
+      - name: List directories
+        run: ls -l /Builds/Server
 
       
-      - name: Install tree package
-        run: sudo apt-get install tree
+      - name: Show directory tree 1
+        run: find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
         
       - name: Show directory tree
         run: tree
