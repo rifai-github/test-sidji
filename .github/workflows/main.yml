@@ -56,22 +56,28 @@ jobs:
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          
       
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.3.0
         with:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Encode GCP_SA_KEY
+        id: encode_key
+        run: echo -n "${{ secrets.GCP_SA_KEY }}" | base64
         
-      # - name: Push to GCR GitHub Action
-      #   uses: RafikFarhad/push-to-gcr-github-action@v4.1
-      #   with:
-      #     registry: gcr.io
-      #     project_id: ${{ env.PROJECT_ID }}
-      #     image_name: ${{ env.IMAGE_NAME }}
-      #     image_tag: ${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
-      #     dockerfile: ./Dockerfile
-      #     context: ./
+      - name: Push to GCR GitHub Action
+        uses: RafikFarhad/push-to-gcr-github-action@v4.1
+        with:
+          gcloud_service_key: ${{ steps.encode_key.outputs.stdout }}
+          registry: gcr.io
+          project_id: ${{ env.PROJECT_ID }}
+          image_name: ${{ env.IMAGE_NAME }}
+          image_tag: ${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}
+          dockerfile: ./Dockerfile
+          context: ./
       
       # - name: Decode GCP_SA_KEY
       #   run: |
