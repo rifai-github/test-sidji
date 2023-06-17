@@ -39,11 +39,14 @@ jobs:
             -outputPath "${{ env.OUTPUT_PATH }}/UnityServer.x86_64" \
             -silent-crashes
       
-      - name: List directories
-        run: ls -l /Builds
+      - name: List directories 1
+        run: ls -l
+              
+      - name: List directories 2
+        run: ls -l Builds
       
-      - name: List directories
-        run: ls -l /Builds/Server
+      - name: List directories 3
+        run: ls -l Builds/Server
 
       
       - name: Show directory tree 1
