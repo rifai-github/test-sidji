@@ -32,7 +32,7 @@ namespace AgonesExample.Editor
             BuildPlayerOptions option = new BuildPlayerOptions
             {
                 scenes = scenes,
-                locationPathName = dir + "/test_agones.x86_64",
+                locationPathName = dir + "/UnityServer.x86_64",
                 target = BuildTarget.StandaloneLinux64,
                 subtarget = (int) StandaloneBuildSubtarget.Server,
                 options = BuildOptions.EnableHeadlessMode
