@@ -47,17 +47,17 @@ jobs:
 
       - name: Show directory tree 1
         run: find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
-
-      - name: Show directory tree ALL
+        
+      - name: Find file
+        run: find . -name "UnityServer.x86_64"
+        
+      - name: Find file from root
         run: |
           cd /
-          find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
-          cd ${{ github.workspace }}
-
-
-      - name: Back to workspace
-        run: |
-          cd ${{ github.workspace }}
+          find . -name "UnityServer.x86_64"
+        
+      - name: back to workspace
+        run: cd ${{ github.workspace }}
 
       - name: Get Commit ID
         id: commit_id
