@@ -5,7 +5,7 @@ on:
 
 env:
   PROJECT_ID: agones-test-385708
-  IMAGE_NAME: server_test_rifai
+  IMAGE_REPOSITORY: server_test_rifai
   OUTPUT_PATH: buildserver
 
 jobs:
@@ -38,13 +38,6 @@ jobs:
             -password "${{ secrets.UNITY_PASSWORD }}" \
             -silent-crashes
             
-      - name: Get current directory
-        run: pwd
-
-      - name: Get Commit ID
-        id: commit_id
-        run: echo "::set-output name=commit_id::${GITHUB_SHA}"
-      
       - name: Get Branch Name
         id: branch_name
         run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
@@ -52,6 +45,10 @@ jobs:
       - name: Get current date
         id: date
         run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
+
+      - name: Set Docker Image Name
+        id: docker_image_url
+        run: echo "::set-output name=image_url::gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}"
 
       - name: 'Authenticate to Google Cloud'
         id: 'auth'
@@ -65,8 +62,17 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           
-      - name: 'Use gcloud CLI'
-        run: 'gcloud info'
-          
       - name: 'Use gcloud to upload docker'
-        run: 'gcloud builds submit --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}'
+        run: 'gcloud builds submit --tag ${{ steps.docker_image_url.outputs.image_url }}'
+
+      # - name: 'Run Agones Apply Fleet'
+      #   run: |
+      #     curl --location 'http://34.128.95.5:30101/agones/fleet' \
+      #     --header 'Content-Type: application/json' \
+      #     --data '{"container": "${{ steps.docker_image_url.outputs.image_url }}"}'
+
+      - name: Send Discord Notification
+        run: |
+          DISCORD_MESSAGE="Build Server completed successfully! :tada:\n\nNow Run with container : ${{ steps.docker_image_url.outputs.image_url }}"
+
+          curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$DISCORD_MESSAGE\"}" ${{ secrets.DISCORD_WEBHOOK_URL }}
