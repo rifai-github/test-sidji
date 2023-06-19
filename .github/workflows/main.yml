@@ -13,7 +13,7 @@ jobs:
     name: Build for Linux Server
     runs-on: ubuntu-latest
     container:
-      image: unityci/editor:ubuntu-2021.3.7f1-linux-il2cpp-1.1.2
+      image: unityci/editor:ubuntu-2021.3.11f1-linux-il2cpp-1.1.2
       options: --user 0
     steps:
       - name: Checkout code
