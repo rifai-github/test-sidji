@@ -32,7 +32,7 @@ jobs:
             -batchmode \
             -nographics \
             -projectPath $(pwd) \
-            -buildTarget Linux64 \
+            -buildTarget StandaloneLinux64 \
             -executeMethod BatchBuild.BuildServer \
             -define UNITY_SERVER \
             -serial "${{ secrets.UNITY_SERIAL }}" \
