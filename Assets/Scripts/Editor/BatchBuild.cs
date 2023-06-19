@@ -25,7 +25,7 @@ namespace AgonesExample.Editor
         public static void BuildServer()
         {
             string[] scenes = GetIncludedScenePaths();
-            string dir = "Builds/Server";
+            string dir = "buildserver";
 
             Directory.CreateDirectory(dir);
 

@@ -6,7 +6,7 @@ on:
 env:
   PROJECT_ID: agones-test-385708
   IMAGE_NAME: server_test_rifai
-  OUTPUT_PATH: Builds/Server
+  OUTPUT_PATH: buildserver
 
 jobs:
   buildLinuxGameServer:
