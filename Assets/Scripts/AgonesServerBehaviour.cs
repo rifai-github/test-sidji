@@ -33,15 +33,11 @@ namespace Agones
 
         private void Awake()
         {
-            #if UNITY_SERVER
-            Debug.Log("#IS UNITY_SERVER");
-            #endif
-            
-            #if !AGONES_SERVER
-            Debug.Log("NOT AGONES_SERVER");
+            #if !UNITY_SERVER || UNITY_EDITOR
+            Debug.Log("NOT !UNITY_SERVER || UNITY_EDITOR");
             gameObject.SetActive(false);
             #else
-            Debug.Log("IS AGONES_SERVER");
+            Debug.Log("IS UNITY_SERVER || UNITY_EDITOR");
             DontDestroyOnLoad(gameObject);
             Instance = this;
             #endif           

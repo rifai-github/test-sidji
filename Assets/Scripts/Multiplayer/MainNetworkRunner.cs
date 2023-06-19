@@ -32,7 +32,7 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
     async void Start()
     {
-        #if !AGONES_SERVER
+        #if !UNITY_SERVER || UNITY_EDITOR
         var result = await networkRunner.JoinSessionLobby(SessionLobby.ClientServer);
 
         if (result.Ok) {
@@ -52,7 +52,7 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
         var result = await networkRunner.StartGame(new StartGameArgs()
         {
-        #if !AGONES_SERVER
+        #if !UNITY_SERVER || UNITY_EDITOR
             GameMode = GameMode.Client,
         #else
             GameMode = GameMode.Server,
@@ -105,7 +105,7 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        #if AGONES_SERVER
+        #if UNITY_SERVER && !UNITY_EDITOR
         if (playerList.Count == 0)
         {
             Debug.Log("Run Fuction Allocate");
@@ -126,7 +126,7 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
     {
         playerList.Remove(player);
         playerList.TrimExcess();
-        #if AGONES_SERVER
+        #if UNITY_SERVER && !UNITY_EDITOR
         if (playerList.Count == 0)
         {
             Debug.Log("Run Function Shutdown");
@@ -149,7 +149,7 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
-        #if !AGONES_SERVER
+        #if !UNITY_SERVER || UNITY_EDITOR
         if (!isJoined)
             sessionSelection.RefreshSession(sessionList);
         #endif
