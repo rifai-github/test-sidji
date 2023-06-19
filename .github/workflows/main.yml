@@ -29,7 +29,6 @@ jobs:
 
       - name: Build Unity Dedicated Server
         run: |
-          mkdir -p ${{ env.OUTPUT_PATH }}
           /opt/unity/Editor/Unity \
             -quit \
             -batchmode \
