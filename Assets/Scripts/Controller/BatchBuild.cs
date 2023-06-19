@@ -9,14 +9,14 @@ internal static class BatchBuild
     public static void BuildServer()
     {
         string[] scenes = GetIncludedScenePaths();
-        string dir = "Builds/Server";
+        string dir = "buildserver";
 
         Directory.CreateDirectory(dir);
 
         BuildPlayerOptions option = new BuildPlayerOptions
         {
             scenes = scenes,
-            locationPathName = dir + "/UnitySimpleServer.x86_64",
+            locationPathName = dir + "/UnityServer.x86_64",
             target = BuildTarget.StandaloneLinux64,
             subtarget = (int) StandaloneBuildSubtarget.Server,
             options = BuildOptions.EnableHeadlessMode
