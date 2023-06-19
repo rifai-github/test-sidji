@@ -19,7 +19,8 @@ internal static class BatchBuild
             locationPathName = dir + "/UnityServer",
             target = BuildTarget.StandaloneLinux64,
             subtarget = (int) StandaloneBuildSubtarget.Server,
-            options = BuildOptions.EnableHeadlessMode
+            extraScriptingDefines = new string[] {"UNITY_SERVER"},
+            options = BuildOptions.EnableHeadlessMode,
         };
         BuildPipeline.BuildPlayer(option);
     }
