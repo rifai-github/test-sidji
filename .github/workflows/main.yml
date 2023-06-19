@@ -34,7 +34,7 @@ jobs:
             -projectPath $(pwd) \
             -buildTarget StandaloneLinux64 \
             -executeMethod BatchBuild.BuildServer \
-            -define UNITY_SERVER \
+            -define "UNITY_SERVER" \
             -serial "${{ secrets.UNITY_SERIAL }}" \
             -username "${{ secrets.UNITY_EMAIL }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
