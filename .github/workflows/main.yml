@@ -7,6 +7,7 @@ env:
   PROJECT_ID: agones-test-385708
   IMAGE_REPOSITORY: server_test_rifai
   OUTPUT_PATH: buildserver
+  ADMIN_PANEL_URL: https://firgefun.io/example_adminpanel_for_githubactoin
 
 jobs:
   buildLinuxGameServer:
@@ -37,18 +38,14 @@ jobs:
             -username "${{ secrets.UNITY_EMAIL }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
             -silent-crashes
-            
-      - name: Get Branch Name
-        id: branch_name
-        run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
 
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
+      - name: Set Tag Container
+        id: tag_image
+        run: echo "::set-output name=tag::${GITHUB_REF#refs/heads/}-$(date +'%Y%m%d%H%M%S')"
 
-      - name: Set Docker Image Name
-        id: docker_image_url
-        run: echo "::set-output name=image_url::gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.branch_name.outputs.branch_name }}-${{ steps.date.outputs.date }}"
+      - name: Set Docker Image
+        id: docker_image
+        run: echo "::set-output name=image_url::gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.tag_image.outputs.tag }}"
 
       - name: 'Authenticate to Google Cloud'
         id: 'auth'
@@ -63,16 +60,16 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           
       - name: 'Use gcloud to upload docker'
-        run: 'gcloud builds submit --tag ${{ steps.docker_image_url.outputs.image_url }}'
+        run: 'gcloud builds submit --tag ${{ steps.docker_image.outputs.image_url }}'
 
       # - name: 'Run Agones Apply Fleet'
       #   run: |
       #     curl --location 'http://34.128.95.5:30101/agones/fleet' \
       #     --header 'Content-Type: application/json' \
-      #     --data '{"container": "${{ steps.docker_image_url.outputs.image_url }}"}'
+      #     --data '{"container": "${{ steps.docker_image.outputs.image_url }}"}'
 
       - name: Send Discord Notification
         run: |
-          DISCORD_MESSAGE="Build Server completed successfully! :tada:\n\nNow Run with container : ${{ steps.docker_image_url.outputs.image_url }}"
+          DISCORD_MESSAGE="Server with version ${{ steps.tag_image.outputs.tag }} is available now! :tada:\n\nopen ${{ env.ADMIN_PANEL_URL }} to set build"
 
           curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$DISCORD_MESSAGE\"}" ${{ secrets.DISCORD_WEBHOOK_URL }}
