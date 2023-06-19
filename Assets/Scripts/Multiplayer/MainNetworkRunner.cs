@@ -32,7 +32,7 @@ public class MainNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
 
     async void Start()
     {
-        #if !UNITY_SERVER || UNITY_EDITOR
+        #if !UNITY_STANDALONE_LINUX || UNITY_EDITOR
         var result = await networkRunner.JoinSessionLobby(SessionLobby.ClientServer);
 
         if (result.Ok) {

@@ -33,11 +33,11 @@ namespace Agones
 
         private void Awake()
         {
-            #if !UNITY_SERVER || UNITY_EDITOR
-            Debug.Log("#if !UNITY_SERVER || UNITY_EDITOR");
+            #if !UNITY_STANDALONE_LINUX || UNITY_EDITOR
+            Debug.Log("#if !UNITY_STANDALONE_LINUX || UNITY_EDITOR");
             gameObject.SetActive(false);
             #else
-            Debug.Log("#if UNITY_SERVER");
+            Debug.Log("#if UNITY_STANDALONE_LINUX");
             DontDestroyOnLoad(gameObject);
             Instance = this;
             #endif           
