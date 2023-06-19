@@ -34,6 +34,7 @@ jobs:
             -projectPath $(pwd) \
             -buildTarget Linux64 \
             -executeMethod BatchBuild.BuildServer \
+            -define AGONES_SERVER \
             -serial "${{ secrets.UNITY_SERIAL }}" \
             -username "${{ secrets.UNITY_EMAIL }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
@@ -70,6 +71,6 @@ jobs:
 
       - name: Send Discord Notification
         run: |
-          DISCORD_MESSAGE="Server with version ${{ steps.tag_image.outputs.tag }} is available now! :tada:\n\nopen ${{ env.ADMIN_PANEL_URL }} to set build"
+          DISCORD_MESSAGE="TEST BUILD SERVER CHECK CONTIDION IS AGONES_SERVER!!!!!!!!!!!\n\nServer with version ${{ steps.tag_image.outputs.tag }} is available now! :tada:\n\nopen ${{ env.ADMIN_PANEL_URL }} to set build"
 
           curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$DISCORD_MESSAGE\"}" ${{ secrets.DISCORD_WEBHOOK_URL }}
