@@ -5,5 +5,5 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 WORKDIR /unity
 COPY buildserver/ ./
-RUN chmod +x UnityServer.x86_64
-CMD ["./UnityServer.x86_64", "-batchmode", "-nographics"]
+RUN chmod +x UnityServer
+CMD ["./UnityServer", "-batchmode", "-nographics"]

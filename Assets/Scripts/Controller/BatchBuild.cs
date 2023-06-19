@@ -16,7 +16,7 @@ internal static class BatchBuild
         BuildPlayerOptions option = new BuildPlayerOptions
         {
             scenes = scenes,
-            locationPathName = dir + "/UnityServer.x86_64",
+            locationPathName = dir + "/UnityServer",
             target = BuildTarget.StandaloneLinux64,
             subtarget = (int) StandaloneBuildSubtarget.Server,
             options = BuildOptions.EnableHeadlessMode
