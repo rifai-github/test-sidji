@@ -13,109 +13,109 @@ env:
   ADMIN_PANEL_URL: https://firgefun.io/example_adminpanel_for_githubactoin
 
 jobs:
-  buildWindows:
-    name: Build for Windows Game
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Create LFS file list
-        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
-
-      - name: Restore LFS cache
-        uses: actions/cache@v2
-        id: lfs-cache
-        with:
-          path: .git/lfs
-          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
-
-      - name: Git LFS Pull
-        run: |
-          git lfs pull
-          git add .
-          git reset --hard
-
-      - name: Retrieve Git Commit ID
-        run: |
-          commit_id=$(git rev-parse HEAD | cut -c 1-8)
-          branch_name=$(git rev-parse --abbrev-ref HEAD)
-          echo "Commit ID: $commit_id"
-          echo "COMMIT_ID=$commit_id" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
-
-      - name: Get current date
-        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-
-      - uses: game-ci/unity-builder@v2
-        with:
-          targetPlatform: StandaloneWindows64
-          projectPath: $(pwd)
-          buildName: avarik-fullgame-windows
-
-      - name: Get List
-        run: |
-          ls -al
-  # buildLinuxGameServer:
-  #   name: Build for Linux Server
+  # buildWindows:
+  #   name: Build for Windows Game
   #   runs-on: ubuntu-latest
-  #   container:
-  #     image: unityci/editor:ubuntu-2021.3.11f1-linux-il2cpp-1.1.2
-  #     options: --user 0
+  #   strategy:
+  #     fail-fast: false
   #   steps:
-
-  #     # - name: Install Git
-  #     #   run: |
-  #     #     apt-get update
-  #     #     apt-get install -y git=2.40.0-1ubuntu1
-
-  #     - name: git version
-  #       run: |
-  #         git --version
-
   #     - name: Checkout code
   #       uses: actions/checkout@v2
 
-  #     - name: Build Unity Dedicated Server
+  #     - name: Create LFS file list
+  #       run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+
+  #     - name: Restore LFS cache
+  #       uses: actions/cache@v2
+  #       id: lfs-cache
+  #       with:
+  #         path: .git/lfs
+  #         key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+
+  #     - name: Git LFS Pull
   #       run: |
-  #         /opt/unity/Editor/Unity \
-  #           -quit \
-  #           -batchmode \
-  #           -nographics \
-  #           -projectPath $(pwd)/${GITHUB_REPOSITORY#*/} \
-  #           -executeMethod BatchBuild.BuildServer \
-  #           -serial "${{ secrets.UNITY_SERIAL }}" \
-  #           -username "${{ secrets.UNITY_EMAIL }}" \
-  #           -password "${{ secrets.UNITY_PASSWORD }}" \
-  #           -silent-crashes
+  #         git lfs pull
+  #         git add .
+  #         git reset --hard
 
-  #     - name: Set Tag Container
-  #       id: tag_image
-  #       run: echo "::set-output name=tag::${GITHUB_REF#refs/heads/}-$(date +'%Y%m%d%H%M%S')"
+  #     - name: Retrieve Git Commit ID
+  #       run: |
+  #         commit_id=$(git rev-parse HEAD | cut -c 1-8)
+  #         branch_name=$(git rev-parse --abbrev-ref HEAD)
+  #         echo "Commit ID: $commit_id"
+  #         echo "COMMIT_ID=$commit_id" >> $GITHUB_ENV
+  #         echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
 
-  #     - name: Set Docker Image
-  #       id: docker_image
-  #       run: echo "::set-output name=image_url::gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.tag_image.outputs.tag }}"
+  #     - name: Get current date
+  #       run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
-  #     - name: 'Authenticate to Google Cloud'
-  #       id: 'auth'
-  #       uses: 'google-github-actions/auth@v1'
+  #     - uses: game-ci/unity-builder@v2
   #       with:
-  #         credentials_json: '${{ secrets.GCP_SA_KEY }}'
-          
-  #     - name: Set up Google Cloud SDK
-  #       uses: google-github-actions/setup-gcloud@v1.1.1
-  #       with:
-  #         project_id: ${{ env.PROJECT_ID }}
-  #         service_account_key: ${{ secrets.GCP_SA_KEY }}
+  #         targetPlatform: StandaloneWindows64
+  #         projectPath: $(pwd)
+  #         buildName: avarik-fullgame-windows
 
-  #     - name: change directory
-  #       run: cd ${GITHUB_REPOSITORY#*/}
+  #     - name: Get List
+  #       run: |
+  #         ls -al
+  buildLinuxGameServer:
+    name: Build for Linux Server
+    runs-on: ubuntu-latest
+    container:
+      image: unityci/editor:ubuntu-2021.3.11f1-linux-il2cpp-1.1.2
+      # options: --user 0
+    steps:
+
+      # - name: Install Git
+      #   run: |
+      #     apt-get update
+      #     apt-get install -y git=2.40.0-1ubuntu1
+
+      - name: git version
+        run: |
+          git --version
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Unity Dedicated Server
+        run: |
+          /opt/unity/Editor/Unity \
+            -quit \
+            -batchmode \
+            -nographics \
+            -projectPath $(pwd)/${GITHUB_REPOSITORY#*/} \
+            -executeMethod BatchBuild.BuildServer \
+            -serial "${{ secrets.UNITY_SERIAL }}" \
+            -username "${{ secrets.UNITY_EMAIL }}" \
+            -password "${{ secrets.UNITY_PASSWORD }}" \
+            -silent-crashes
+
+      - name: Set Tag Container
+        id: tag_image
+        run: echo "::set-output name=tag::${GITHUB_REF#refs/heads/}-$(date +'%Y%m%d%H%M%S')"
+
+      - name: Set Docker Image
+        id: docker_image
+        run: echo "::set-output name=image_url::gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.tag_image.outputs.tag }}"
+
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
           
-  #     - name: 'Use gcloud to upload docker'
-  #       run: 'gcloud builds submit --tag ${{ steps.docker_image.outputs.image_url }}'
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1.1.1
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: change directory
+        run: cd ${GITHUB_REPOSITORY#*/}
+          
+      - name: 'Use gcloud to upload docker'
+        run: 'gcloud builds submit --tag ${{ steps.docker_image.outputs.image_url }}'
 
   #     # - name: 'Run Agones Apply Fleet'
   #     #   run: |
