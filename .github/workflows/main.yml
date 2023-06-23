@@ -24,23 +24,14 @@ jobs:
       - name: Install Git
         run: |
           apt-get update
-          apt-get install -y git
+          apt-get install -y git=2.40*
 
-      - name: Repository Name
+      - name: git version
         run: |
-          echo  ${{ github.repositoryUrl }}
-          echo "#######" 
-          echo $(pwd)/${GITHUB_REPOSITORY#*/}
+          git --version
 
-      - name: Clone repository
-        run: git clone https://github.com/${{ github.repository }}.git
-
-
-
-      # - name: Checkout code
-      #   uses: actions/checkout@v3
-      #   with:
-      #     submodules: true
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Build Unity Dedicated Server
         run: |
@@ -74,6 +65,9 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: change directory
+        run: cd ${GITHUB_REPOSITORY#*/}
           
       - name: 'Use gcloud to upload docker'
         run: 'gcloud builds submit --tag ${{ steps.docker_image.outputs.image_url }}'
