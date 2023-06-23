@@ -24,7 +24,7 @@ jobs:
       - name: Install Git
         run: |
           apt-get update
-          apt-get install -y git=2.40*
+          apt-get install -y git=2.40.0
 
       - name: git version
         run: |
