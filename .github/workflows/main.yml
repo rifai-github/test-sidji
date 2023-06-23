@@ -26,18 +26,21 @@ jobs:
           apt-get update
           apt-get install -y git
 
-      - name: Git Version
+      - name: Repository Name
         run: |
-          git --version
+          echo  ${{ github.repositoryUrl }}
+          echo "#######" 
+          echo $(pwd)/${GITHUB_REPOSITORY#*/}
+
+      - name: Clone repository
+        run: git clone  ${{ github.repository }}
 
 
 
-
-
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: true
+      # - name: Checkout code
+      #   uses: actions/checkout@v3
+      #   with:
+      #     submodules: true
 
       - name: Build Unity Dedicated Server
         run: |
@@ -45,7 +48,7 @@ jobs:
             -quit \
             -batchmode \
             -nographics \
-            -projectPath $(pwd) \
+            -projectPath $(pwd)/${GITHUB_REPOSITORY#*/} \
             -executeMethod BatchBuild.BuildServer \
             -serial "${{ secrets.UNITY_SERIAL }}" \
             -username "${{ secrets.UNITY_EMAIL }}" \
