@@ -2,6 +2,9 @@ name: AvarikCI Build 🎮
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 env:
   PROJECT_ID: agones-test-385708
