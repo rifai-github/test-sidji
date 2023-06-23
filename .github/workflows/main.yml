@@ -21,10 +21,10 @@ jobs:
       options: --user 0
     steps:
 
-      - name: Install Git
-        run: |
-          apt-get update
-          apt-get install -y git=2.40.0-1ubuntu1
+      # - name: Install Git
+      #   run: |
+      #     apt-get update
+      #     apt-get install -y git=2.40.0-1ubuntu1
 
       - name: git version
         run: |
