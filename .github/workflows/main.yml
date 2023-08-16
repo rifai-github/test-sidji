@@ -60,7 +60,7 @@ jobs:
   #         ls -al
   buildLinuxGameServer:
     name: Build for Linux Server
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: unityci/editor:ubuntu-2021.3.11f1-linux-il2cpp-1
       # options: --user 0
