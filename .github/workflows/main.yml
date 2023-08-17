@@ -55,6 +55,4 @@ jobs:
   #         projectPath: $(pwd)
   #         buildName: avarik-fullgame-windows
 
-      - name: Get List
-        run: |
-          ls -al
+      - run: pwd
